@@ -1,0 +1,57 @@
+# This .gitignore file should be placed at the root of your Unity project directory
+
+# Ignore the following directories
+[Ll]ibrary/
+[Tt]emp/
+[Oo]bj/
+[Bb]uild/
+[Bb]uilds/
+[Ll]ogs/
+[Mm]emoryCaptures/
+UserSettings/
+
+# Avoid ignoring Asset Store tools
+!/[Aa]ssets/Plugins/
+!/[Aa]ssets/Editor/
+
+# Ignore auto-generated files from Unity
+*.csproj
+*.unityproj
+*.sln
+*.suo
+*.tmp
+*.user
+*.userprefs
+*.pidb
+*.booproj
+*.svd
+*.pdb
+*.opendb
+*.VC.db
+*.pidb.meta
+
+# Ignore crash reports
+sysinfo.txt
+
+# Ignore Unity3D generated meta files
+*.pidb.meta
+
+# Ignore VS Code workspace files
+.vscode/
+
+# Ignore Rider project files
+.idea/
+*.sln.iml
+
+# Ignore builds
+*.apk
+*.aab
+*.unitypackage
+
+# Ignore logs, crash reports, etc.
+*.log
+*.stacktrace
+*.mdmp
+
+# Uncomment if you have a custom folder for asset bundles
+# [Aa]sset[Bb]undles/
