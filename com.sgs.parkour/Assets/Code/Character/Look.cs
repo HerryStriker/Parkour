@@ -1,10 +1,11 @@
+using System;
+using Unity.Mathematics;
 using UnityEngine;
 
 public class Look : MonoBehaviour
 {
-    Camera cam;
+    Holder holder;
     Rigidbody rb;
-    Transform cameraTransform;
 
     [Header("Camera")]
     [SerializeField] Vector3 m_CameraDirection = Vector3.zero;
@@ -28,38 +29,56 @@ public class Look : MonoBehaviour
     [SerializeField] LayerMask m_CollisionMask;
 
     private void Awake() {
-        cam = Camera.main;
-        cameraTransform = cam.transform;
-
+        holder = GetComponent<Holder>();
         rb = GetComponent<Rigidbody>();
-
     }
 
 
     void Start() {
+        InputManager.Instance.OnJumpCanceled += OnJumpCanceled;
+
+
         InputManager.Instance.EnableLook();
     }
 
     void Update() {
-        CameraBehaviour();
-        Rotation();
-    }
-    void Rotation()
-    {
-        rb.MoveRotation(Quaternion.Euler(0, cameraTransform.eulerAngles.y, 0));
+        var mouseInput = InputManager.Instance.Look;
+        var keyboardInput = InputManager.Instance.Move.normalized;
+
+        CameraBehaviour(mouseInput);
+        Rotation(keyboardInput);
     }
 
-    void CameraBehaviour()
+
+    void OnJumpCanceled(object inputManager, EventArgs args) 
     {
-        Vector2 input = new Vector2(InputManager.Instance.Look.x * m_CameraSensitivityX, InputManager.Instance.Look.y * m_CameraSensitivityY) * m_CameraSensitivityNormalized;
-        m_CameraInput = m_CameraInputSettings.GetSmoothDampSettings(input, ref m_CameraInput);
-        //m_CameraInput = InputManager.Instance.MouseInput;
+        var cameraRotation = holder.cameraTransform.eulerAngles.y;
+        var direction = Quaternion.Euler(0,cameraRotation,0);
+
+        rb.MoveRotation(direction);
+    }
+
+    const float THRESHOLD = 0.1f;
+    void Rotation(Vector2 input)
+    {
+        var cameraRotation = holder.cameraTransform.eulerAngles.y;
+        var dir = Mathf.Atan2(input.x, input.y) * Mathf.Rad2Deg + cameraRotation;
+        var moveRotation = Quaternion.Euler(0,dir,0);
+
+        if(input.magnitude > THRESHOLD )
+        {
+            rb.MoveRotation(moveRotation);
+        }
+    }
+
+    void CameraBehaviour(Vector2 input)
+    {
+        Vector2 moveDirection = new Vector2(input.x * m_CameraSensitivityX, input.y * m_CameraSensitivityY) * m_CameraSensitivityNormalized;
+        m_CameraInput = m_CameraInputSettings.GetSmoothDampSettings(moveDirection, ref m_CameraInput);
 
         Vector3 point = transform.position + Vector3.up * m_CameraPointOffset;
 
-        //m_CameraRotation += m_CameraInput;
         m_CameraRotation += m_CameraInputSettings.GetSettings(m_CameraInput.y, m_CameraInput.x);
-
 
         m_CameraRotation.x = Mathf.Clamp(m_CameraRotation.x, m_MinRotation, m_MaxRotation);
 
@@ -70,9 +89,9 @@ public class Look : MonoBehaviour
 
         OnCollision = Physics.Raycast(point, m_CameraDirection, out RaycastHit hit, m_CameraDistance, m_CollisionMask);
 
-        cameraTransform.position = OnCollision ? hit.point : point + m_CameraDirection;
+        holder.cameraTransform.position = OnCollision ? hit.point : point + m_CameraDirection;
 
-        cameraTransform.LookAt(point);
+        holder.cameraTransform.LookAt(point);
     }
 
 }
