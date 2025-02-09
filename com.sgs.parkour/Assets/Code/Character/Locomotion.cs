@@ -13,6 +13,7 @@ public class Locomotion : MonoBehaviour
 
     public bool EnableMovement {get; private set; } = true;
     public bool CancelAction {get; private set; } = false;
+    public bool InAir {get; private set; } = false;
 
     public void EnableCharacterMovement(bool enable)
     {
@@ -28,23 +29,51 @@ public class Locomotion : MonoBehaviour
 
         capsuleCollider.center += new Vector3(0, 1, 0);
         capsuleCollider.height = 2;
+
+        jumpCount = MAX_JUMP_COUNT;
     }
 
     private void Start() {
+        holder.GroundCheck.OnEnter += (holder, args) => {
+            InAir = false;
+
+            if(IsJumping)
+            {
+                IsJumping = false;
+                time = 0;
+            }
+            Debug.Log("Enter");
+        };
+
+        holder.GroundCheck.OnEnter += (holder, args) => {
+            InAir = true;
+            Debug.Log("Exit");
+        };
+
+        holder.FrontCheck.OnEnter += Bouncing;        
+
         //InputManager.Instance.OnJumpPerformed += OnJumpPerformed;
+        holder.GroundCheck.OnEnter += OnGroundEnter;
         InputManager.Instance.OnJumpCanceled += OnJumpCanceled;
+        InputManager.Instance.OnJumpStart += OnJumpStart;
         InputManager.Instance.OnCancel += OnCancel;
 
         InputManager.Instance.EnableMove();
         InputManager.Instance.EnableJump();
         InputManager.Instance.EnableCancelAction();
     }
+
     private void Update() 
     {
         var moveDirection = InputManager.Instance.Move;
 
         DirectionalJumpLogic();
         Move(moveDirection);
+    }
+
+    void OnGroundEnter(object holder, EventArgs args)
+    {
+        
     }
 
     void OnCancel(object inputManager, EventArgs args)
@@ -55,69 +84,116 @@ public class Locomotion : MonoBehaviour
         if (!CancelAction)
         {
             CancelAction = true;
+            IsJumping = false;
+            time = 0;
         }
     }
 
-    [Header("Super Jump")]    
+    [Header("Jump")]
+    public bool IsJumping = false;
+
+    float time;
     const float MIN_TIME = 0;
     const float MAX_TIME = 3;
 
-    float time;
-    Vector3 jumpDirection;
+    const int MAX_JUMP_COUNT = 10;
+    int jumpCount;
 
-    const float MIN_JUMP_ANGLE = 0f;
-    const float MAX_JUMP_ANGLE = 5f;
+    Vector3 direction;
+    [SerializeField, Range(0,1)] float MIN_FORCE_ANGLE = 0;
+    [SerializeField, Range(0,1)] float MAX_FORCE_ANGLE = 1;
 
-    
-    [SerializeField] float directionForce = 1f;
-    [SerializeField] float forwardForce = 5f;
-    [SerializeField] float upForce = 5;
+
+    [SerializeField, Range(0,1)] float forwardForce = 0.1f;
+    [SerializeField, Range(0,1)] float upForce = 0.1f;
+
+    [SerializeField] float MIN_FORCE = 0f;
+    [SerializeField] float MAX_FORCE = 15f;
 
     void DirectionalJumpLogic()
     {
-        time += InputManager.Instance.IsJumping && time < MAX_TIME && holder.IsGrounded ? Time.deltaTime : -Time.deltaTime;
+        var canJump = IsJumping && time < MAX_TIME && holder.GroundCheck.IsColliding;
+        var canDoubleJump = IsJumping && time < MAX_TIME && !holder.GroundCheck.IsColliding && jumpCount > 0;
+        time += canJump || canDoubleJump ? Time.deltaTime : -Time.deltaTime;
         time = Mathf.Clamp(time, MIN_TIME, MAX_TIME);
         
         float normalized = time / MAX_TIME;
 
-        float angle = Mathf.Lerp(MIN_JUMP_ANGLE, MAX_JUMP_ANGLE, normalized);
+        float angle = Mathf.Lerp(MIN_FORCE_ANGLE, MAX_FORCE_ANGLE, normalized);
 
-        float cameraRotation = holder.cameraTransform.eulerAngles.y;
-        Vector3 cameraForward = Quaternion.Euler(0,cameraRotation, 0) * Vector3.forward;
+        float cameraRotation = holder.CameraTransform.eulerAngles.y;
+        Vector3 fowardDirection = Quaternion.Euler(0,cameraRotation,0) * (Vector3.forward * forwardForce);
+        Vector3 upDirection = new Vector3(0,angle,0) * upForce;
 
-        jumpDirection = forwardForce * cameraForward + new Vector3(0,angle,0) * upForce;
-        Debug.DrawRay(transform.position, jumpDirection);
+        float force = Mathf.Lerp(MIN_FORCE, MAX_FORCE, normalized);
+        
+        direction = (fowardDirection + upDirection) * force;
+
+        Debug.DrawRay(transform.position, direction);
+    }
+
+    void Bouncing(object holder, EventArgs args) 
+    {
+        if(InAir)
+        {
+            Vector3 inversedDirection = transform.InverseTransformDirection(rb.linearVelocity);
+            rb.linearVelocity = inversedDirection;
+        }
+    }
+
+    void OnJumpStart(object inputManager, EventArgs args)
+    {
+        //Debug.Log("OnJumpStart");
+        if(holder.GroundCheck.IsColliding)
+        {
+            IsJumping = true;
+            rb.linearVelocity = Vector3.zero;
+        }
     }
 
     void OnJumpCanceled(object inputManager, EventArgs args) {
         if(CancelAction)
         {
             CancelAction = false;
+            IsJumping = false;
             time = 0;
             return;
         }
+        var isGrouded = holder.GroundCheck.IsColliding;
 
-        if(holder.IsGrounded) 
+        if(isGrouded || (!isGrouded && jumpCount > 0)) 
         {
-            rb.AddForce(jumpDirection * directionForce, ForceMode.Impulse);
+            rb.AddForce(direction, ForceMode.Impulse);
             time = 0;
+            jumpCount--;
         }
     }
 
-    const float JUMP_FORCE = 60f;
-    void OnJumpPerformed(object inputManager, EventArgs args) {
-        if(!holder.IsGrounded) return;
+    // const float JUMP_FORCE = 60f;
+    // void OnJumpPerformed(object inputManager, EventArgs args) {
+    //     if(!holder.IsGrounded) return;
 
-        rb.AddForce(Vector3.up * JUMP_FORCE ,ForceMode.Impulse);
-    }
+    //     rb.AddForce(Vector3.up * JUMP_FORCE ,ForceMode.Impulse);
+    // }
 
     const float CHRACTER_SPEED = 6f;
     void Move(Vector2 direction)
     {
-        if (EnableMovement && holder.IsGrounded && !InputManager.Instance.IsJumping)
+        if (EnableMovement && holder.GroundCheck.IsColliding && !IsJumping)
         {
             var dir = CHRACTER_SPEED * direction.magnitude * transform.forward;
-            rb.linearVelocity = new Vector3(dir.x , rb.linearVelocity.y , dir.z);
+            var targetSpeed = CHRACTER_SPEED - rb.linearVelocity.magnitude;
+            if(rb.linearVelocity.magnitude < CHRACTER_SPEED)
+            {
+                if(direction.magnitude > 0)
+                {
+                    rb.AddForce(new Vector3(dir.x , rb.linearVelocity.y , dir.z) * targetSpeed);
+                }
+                else
+                {
+                    rb.linearVelocity = Vector3.zero;
+                }
+            }
         }
     }
 

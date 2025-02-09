@@ -19,7 +19,7 @@ public class InputSetting
     }
     public Vector2 GetSettings(float x, float y)
     {
-        return new Vector2(InvertFloat(x, InverterOffset.x), InvertFloat(y, InverterOffset.y));
+        return new Vector2(InvertFloat(x, InverterOffset.y), InvertFloat(y, InverterOffset.x));
     }
 
     public Vector2 GetSmoothDampSettings(float x, float y, ref Vector2 valueRef)

@@ -1,37 +1,54 @@
+using System;
+using JetBrains.Annotations;
+using Unity.VisualScripting;
 using UnityEngine;
 
 public class Holder : MonoBehaviour
 {
     Camera mainCamera;
-    public Transform cameraTransform;
 
+    public Transform CameraTransform { get; private set; }
     void Awake()
     {
+        GroundCheck = new CollisionCheck(GroundCheck, transform);
+        FrontCheck = new CollisionCheck(FrontCheck, transform);
+        CheckPointCheck = new CollisionCheck(CheckPointCheck, transform);
+        
         mainCamera = Camera.main;
-        cameraTransform = mainCamera.transform;
+        CameraTransform = mainCamera.transform;
     }
 
     void Update()
     {
-        CheckGrounded();
+        //CheckGrounded();
+        //FrontCheck();
     }
 
-    [Header("Ground Check")]
-    public bool IsGrounded { get; private set; } = false;
-    [SerializeField] float groundedHeight = 1f;
-    [SerializeField] float groundedRadius = 0.2f;
-    [SerializeField] LayerMask groundMask;
+#region Collision Check
 
-    void CheckGrounded()
-    {
-        IsGrounded = Physics.CheckSphere(transform.up * groundedHeight + transform.position, groundedRadius, groundMask);
-    }
+    [field: SerializeField] public CollisionCheck FrontCheck { get; private set; }
+    [field: SerializeField] public CollisionCheck GroundCheck { get; private set; }
 
+    [field: SerializeField] public CollisionCheck CheckPointCheck { get; private set; }
+
+#endregion
 
     private void OnDrawGizmos()
     {
-        var color = IsGrounded ? Color.green : Color.yellow;
-        Gizmos.color = color;
-        Gizmos.DrawSphere(transform.up * groundedHeight + transform.position, groundedRadius);
+        GroundCheck.DrawGizmos();
+        FrontCheck.DrawGizmos();
+        CheckPointCheck.DrawGizmos();
+
+        if(true) return;
+
+        // var groundedColor = IsGrounded ? Color.green : Color.yellow;
+        // Gizmos.color = groundedColor;
+        // Gizmos.DrawSphere(transform.up * groundedHeight + transform.position, groundedRadius);
+
+        // var frontColor = IsFrontCollision ? Color.green : Color.yellow;
+        // Gizmos.color = frontColor;
+        // Gizmos.DrawSphere(transform.forward * frontRange + (transform.position + transform.up), frontRadius);
+        // Gizmos.DrawRay(transform.position + transform.up, transform.forward * frontRange);
+
     }
 }
