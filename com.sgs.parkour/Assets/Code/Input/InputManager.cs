@@ -81,18 +81,25 @@ public class InputManager : MonoBehaviour, IPlayerActions
     }
 
     public Vector2 Move {get; private set;}
+    public bool IsMoving {get; private set;}
     void IPlayerActions.OnMove(InputAction.CallbackContext context)
     {
         Move = context.ReadValue<Vector2>();
+        IsMoving = Move.magnitude > 0;
     }
     public void EnableMove()
     {
         inputActions.Player.Move.Enable();
+        inputActions.Player.Walk.Enable();
+        inputActions.Player.Sprint.Enable();
+
     }
     
     public void DisableMove()
     {
         inputActions.Player.Move.Disable();
+        inputActions.Player.Walk.Disable();
+        inputActions.Player.Sprint.Disable();
     }
 
     void IPlayerActions.OnNext(InputAction.CallbackContext context)
@@ -105,9 +112,16 @@ public class InputManager : MonoBehaviour, IPlayerActions
         throw new System.NotImplementedException();
     }
 
+    public event EventHandler OnSprintStart;
+    public event EventHandler OnSprintPerformed;
+    public event EventHandler OnSprintCanceled;
+
+    public bool IsSpriting {get; private set;}
+
     void IPlayerActions.OnSprint(InputAction.CallbackContext context)
     {
-        throw new System.NotImplementedException();
+        IsSpriting = context.ReadValue<float>() > 0;
+        InvokeEvents_SPC(context, OnSprintStart, OnSprintPerformed, OnSprintCanceled);
     }
 
     public void EnableCancelAction() {
@@ -128,6 +142,36 @@ public class InputManager : MonoBehaviour, IPlayerActions
                 OnCancel?.Invoke(this, EventArgs.Empty);
             break;
         }
+    }
+    public event EventHandler OnWalkStart;
+    public event EventHandler OnWalkPerformed;
+    public event EventHandler OnWalkCanceled;
+
+    public bool IsWalking {get; private set;}
+
+    public void OnWalk(InputAction.CallbackContext context)
+    {
+        IsWalking = context.ReadValue<float>() > 0 ;
+        InvokeEvents_SPC(context, OnWalkStart, OnWalkPerformed, OnWalkCanceled);
+    }
+
+    void InvokeEvents_SPC(InputAction.CallbackContext ctx, params EventHandler[] events)
+    {
+        switch(ctx.phase) 
+        {
+            case InputActionPhase.Started:
+                events[0]?.Invoke(this, EventArgs.Empty);
+            break;
+
+            case InputActionPhase.Performed:
+                events[1]?.Invoke(this, EventArgs.Empty);
+            break;
+
+            case InputActionPhase.Canceled:
+                events[2]?.Invoke(this, EventArgs.Empty);
+            break;
+        }   
+        
     }
 }
 

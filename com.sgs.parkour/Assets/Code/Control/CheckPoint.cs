@@ -27,8 +27,6 @@ public class CheckPoint : MonoBehaviour
     const float RADIUS = .2f;
     void OnDrawGizmos()
     {
-        
-
         Gizmos.color = Color.yellow;
         Gizmos.DrawSphere(Vector3.up * heigth, RADIUS);
     }

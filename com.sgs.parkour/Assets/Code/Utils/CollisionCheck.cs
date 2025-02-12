@@ -32,6 +32,7 @@ public class CollisionCheck
         this.mask = collisionCheck.mask;
         this.height = collisionCheck.height;
         this.enableGizmos = collisionCheck.enableGizmos;
+        
         if(transform.TryGetComponent(out MonoBehaviour monoBehaviour))
         {
             monoBehaviour.StartCoroutine(UpdateCheck());

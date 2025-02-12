@@ -109,6 +109,15 @@ public partial class @InputActions: IInputActionCollection2, IDisposable
                     ""initialStateCheck"": false
                 },
                 {
+                    ""name"": ""Walk"",
+                    ""type"": ""Button"",
+                    ""id"": ""2bb791c7-7943-465e-8819-0aac8abbc0d3"",
+                    ""expectedControlType"": """",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                },
+                {
                     ""name"": ""CancelAction"",
                     ""type"": ""Button"",
                     ""id"": ""5dde416b-81c4-4288-8ef6-8d38285a8453"",
@@ -402,6 +411,17 @@ public partial class @InputActions: IInputActionCollection2, IDisposable
                     ""processors"": """",
                     ""groups"": ""XR"",
                     ""action"": ""Sprint"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""68febb96-6324-4982-b48d-14ca44a209ed"",
+                    ""path"": ""<Keyboard>/c"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": ""Keyboard&Mouse"",
+                    ""action"": ""Walk"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
                 },
@@ -1108,6 +1128,7 @@ public partial class @InputActions: IInputActionCollection2, IDisposable
         m_Player_Previous = m_Player.FindAction("Previous", throwIfNotFound: true);
         m_Player_Next = m_Player.FindAction("Next", throwIfNotFound: true);
         m_Player_Sprint = m_Player.FindAction("Sprint", throwIfNotFound: true);
+        m_Player_Walk = m_Player.FindAction("Walk", throwIfNotFound: true);
         m_Player_CancelAction = m_Player.FindAction("CancelAction", throwIfNotFound: true);
         // UI
         m_UI = asset.FindActionMap("UI", throwIfNotFound: true);
@@ -1197,6 +1218,7 @@ public partial class @InputActions: IInputActionCollection2, IDisposable
     private readonly InputAction m_Player_Previous;
     private readonly InputAction m_Player_Next;
     private readonly InputAction m_Player_Sprint;
+    private readonly InputAction m_Player_Walk;
     private readonly InputAction m_Player_CancelAction;
     public struct PlayerActions
     {
@@ -1211,6 +1233,7 @@ public partial class @InputActions: IInputActionCollection2, IDisposable
         public InputAction @Previous => m_Wrapper.m_Player_Previous;
         public InputAction @Next => m_Wrapper.m_Player_Next;
         public InputAction @Sprint => m_Wrapper.m_Player_Sprint;
+        public InputAction @Walk => m_Wrapper.m_Player_Walk;
         public InputAction @CancelAction => m_Wrapper.m_Player_CancelAction;
         public InputActionMap Get() { return m_Wrapper.m_Player; }
         public void Enable() { Get().Enable(); }
@@ -1248,6 +1271,9 @@ public partial class @InputActions: IInputActionCollection2, IDisposable
             @Sprint.started += instance.OnSprint;
             @Sprint.performed += instance.OnSprint;
             @Sprint.canceled += instance.OnSprint;
+            @Walk.started += instance.OnWalk;
+            @Walk.performed += instance.OnWalk;
+            @Walk.canceled += instance.OnWalk;
             @CancelAction.started += instance.OnCancelAction;
             @CancelAction.performed += instance.OnCancelAction;
             @CancelAction.canceled += instance.OnCancelAction;
@@ -1282,6 +1308,9 @@ public partial class @InputActions: IInputActionCollection2, IDisposable
             @Sprint.started -= instance.OnSprint;
             @Sprint.performed -= instance.OnSprint;
             @Sprint.canceled -= instance.OnSprint;
+            @Walk.started -= instance.OnWalk;
+            @Walk.performed -= instance.OnWalk;
+            @Walk.canceled -= instance.OnWalk;
             @CancelAction.started -= instance.OnCancelAction;
             @CancelAction.performed -= instance.OnCancelAction;
             @CancelAction.canceled -= instance.OnCancelAction;
@@ -1476,6 +1505,7 @@ public partial class @InputActions: IInputActionCollection2, IDisposable
         void OnPrevious(InputAction.CallbackContext context);
         void OnNext(InputAction.CallbackContext context);
         void OnSprint(InputAction.CallbackContext context);
+        void OnWalk(InputAction.CallbackContext context);
         void OnCancelAction(InputAction.CallbackContext context);
     }
     public interface IUIActions

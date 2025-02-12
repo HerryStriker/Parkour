@@ -1,7 +1,9 @@
 using System;
 using JetBrains.Annotations;
+using Unity.Mathematics;
 using Unity.VisualScripting;
 using UnityEngine;
+using UnityEngine.Rendering.Universal;
 
 public class Holder : MonoBehaviour
 {
@@ -18,17 +20,36 @@ public class Holder : MonoBehaviour
         CameraTransform = mainCamera.transform;
     }
 
-    void Update()
+#region MOVEMENT
+    [Header("MOVEMENT")]
+    [SerializeField, Range(0,4)] float walk_velocity;
+    [SerializeField, Range(4,8)] float run_velocity;
+    [SerializeField, Range(8,12)] float sprint_velocity;
+
+    public float NormalizedVelocity
     {
-        //CheckGrounded();
-        //FrontCheck();
+        get {
+            bool isMoving = InputManager.Instance.IsMoving;
+            bool isSpriting = isMoving && InputManager.Instance.IsSpriting;
+            bool isWalking = isMoving && InputManager.Instance.IsWalking; 
+            float velocity = isWalking ? walk_velocity : isSpriting ? sprint_velocity : isMoving ? run_velocity : default; 
+            //Debug.Log("Velocity: " + velocity);
+            return velocity / sprint_velocity;
+        }
     }
 
-#region Collision Check
+    public float Velocity {
+        get {
+            return Mathf.Lerp(0f, sprint_velocity, NormalizedVelocity);
+        }
+    }
+#endregion
 
+#region COLLISION CHECK
+
+    [Header("CHECK")]
     [field: SerializeField] public CollisionCheck FrontCheck { get; private set; }
     [field: SerializeField] public CollisionCheck GroundCheck { get; private set; }
-
     [field: SerializeField] public CollisionCheck CheckPointCheck { get; private set; }
 
 #endregion
@@ -38,17 +59,5 @@ public class Holder : MonoBehaviour
         GroundCheck.DrawGizmos();
         FrontCheck.DrawGizmos();
         CheckPointCheck.DrawGizmos();
-
-        if(true) return;
-
-        // var groundedColor = IsGrounded ? Color.green : Color.yellow;
-        // Gizmos.color = groundedColor;
-        // Gizmos.DrawSphere(transform.up * groundedHeight + transform.position, groundedRadius);
-
-        // var frontColor = IsFrontCollision ? Color.green : Color.yellow;
-        // Gizmos.color = frontColor;
-        // Gizmos.DrawSphere(transform.forward * frontRange + (transform.position + transform.up), frontRadius);
-        // Gizmos.DrawRay(transform.position + transform.up, transform.forward * frontRange);
-
     }
 }
