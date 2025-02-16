@@ -84,7 +84,7 @@ public class InputManager : MonoBehaviour, IPlayerActions
     public bool IsMoving {get; private set;}
     void IPlayerActions.OnMove(InputAction.CallbackContext context)
     {
-        Move = context.ReadValue<Vector2>();
+        Move = context.ReadValue<Vector2>().normalized;
         IsMoving = Move.magnitude > 0;
     }
     public void EnableMove()
