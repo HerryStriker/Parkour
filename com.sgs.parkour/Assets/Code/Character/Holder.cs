@@ -12,6 +12,7 @@ public class Holder : MonoBehaviour
     public Transform CameraTransform { get; private set; }
     void Awake()
     {
+        _locomotion = GetComponent<Locomotion>();
         GroundCheck = new CollisionCheck(GroundCheck, transform);
         FrontCheck = new CollisionCheck(FrontCheck, transform);
         CheckPointCheck = new CollisionCheck(CheckPointCheck, transform);
@@ -19,6 +20,45 @@ public class Holder : MonoBehaviour
         mainCamera = Camera.main;
         CameraTransform = mainCamera.transform;
     }
+
+    void Update()
+    {
+        Timer();
+    }
+
+    #region JUMP CONTROL
+    Locomotion _locomotion;
+    public bool InAir {get; set;}
+
+
+    public float CurrentTime { get; private set; }
+    public float NormalizedTime 
+    {
+        get
+        {
+            return CurrentTime / MAX_TIME;
+        }
+    }
+    const float MIN_TIME = 0;
+    const float MAX_TIME = 3;
+
+    void Timer()
+    {
+        // CAN JUMP IF IS ON GROUND
+        var canJump = _locomotion.IsJumping && CurrentTime < MAX_TIME && GroundCheck.IsColliding;
+
+        //CAN JUMP IF IS ON AIR AND HAVE DOUBLE JUMP LEFT
+        var canDoubleJump = InputManager.Instance.IsJumping && _locomotion.IsJumping && CurrentTime < MAX_TIME && !GroundCheck.IsColliding && _locomotion.JumpCount > 0;
+
+        CurrentTime += canJump || canDoubleJump ? Time.deltaTime : -Time.deltaTime;
+        CurrentTime = Mathf.Clamp(CurrentTime, MIN_TIME, MAX_TIME);
+    }
+
+    public void ResetTime()
+    {
+        CurrentTime = 0;
+    }
+#endregion
 
 #region MOVEMENT
     [Header("MOVEMENT")]

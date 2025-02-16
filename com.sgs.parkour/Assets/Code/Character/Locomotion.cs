@@ -13,7 +13,6 @@ public class Locomotion : MonoBehaviour
 
     public bool EnableMovement {get; private set; } = true;
     public bool CancelAction {get; private set; } = false;
-    public bool InAir {get; private set; } = false;
 
     public void EnableCharacterMovement(bool enable)
     {
@@ -29,23 +28,23 @@ public class Locomotion : MonoBehaviour
         capsuleCollider.center += new Vector3(0, 1, 0);
         capsuleCollider.height = 2;
 
-        jumpCount = MAX_JUMP_COUNT;
+        JumpCount = MAX_JUMP_COUNT;
     }
 
     private void Start() {
-        holder.GroundCheck.OnEnter += (holder, args) => {
-            InAir = false;
+        holder.GroundCheck.OnEnter += (holderObj, args) => {
+            holder.InAir = false;
 
             if(IsJumping)
             {
                 IsJumping = false;
-                time = 0;
+                holder.ResetTime();
             }
             Debug.Log("GROUND: Enter");
         };
 
-        holder.GroundCheck.OnEnter += (holder, args) => {
-            InAir = true;
+        holder.GroundCheck.OnEnter += (holderObj, args) => {
+            holder.InAir = true;
             Debug.Log("GROUND: Exit");
         };
 
@@ -84,26 +83,14 @@ public class Locomotion : MonoBehaviour
         {
             CancelAction = true;
             IsJumping = false;
-            time = 0;
         }
     }
 
     [Header("JUMP")]
     public bool IsJumping = false;
 
-    float time;
-    float normalizedTime 
-    {
-        get
-        {
-            return time / MAX_TIME;
-        }
-    }
-    const float MIN_TIME = 0;
-    const float MAX_TIME = 3;
-
     const int MAX_JUMP_COUNT = 10;
-    int jumpCount;
+    public int JumpCount {get; private set;}
 
     Vector3 direction;
 
@@ -122,29 +109,20 @@ public class Locomotion : MonoBehaviour
 
     void DirectionalJumpLogic()
     {
-        // CAN JUMP IF IS ON GROUND
-        var canJump = IsJumping && time < MAX_TIME && holder.GroundCheck.IsColliding;
-
-        //CAN JUMP IF IS ON AIR AND HAVE DOUBLE JUMP LEFT
-        var canDoubleJump = InputManager.Instance.IsJumping && IsJumping && time < MAX_TIME && !holder.GroundCheck.IsColliding && jumpCount > 0;
-
-        time += canJump || canDoubleJump ? Time.deltaTime : -Time.deltaTime;
-        time = Mathf.Clamp(time, MIN_TIME, MAX_TIME);
-        
-        float angle = Mathf.Lerp(MIN_FORCE_ANGLE, MAX_FORCE_ANGLE, normalizedTime);
+        float angle = Mathf.Lerp(MIN_FORCE_ANGLE, MAX_FORCE_ANGLE, holder.NormalizedTime);
 
         float cameraRotation = holder.CameraTransform.eulerAngles.y;
         Vector3 fowardDirection = Quaternion.Euler(0,cameraRotation,0) * (Vector3.forward * forwardForce);
         Vector3 upDirection = new Vector3(0,angle,0) * upForce;
 
-        float force = Mathf.Lerp(MIN_FORCE, MAX_FORCE, normalizedTime);
+        float force = Mathf.Lerp(MIN_FORCE, MAX_FORCE, holder.NormalizedTime);
         
         direction = (fowardDirection + upDirection) * force;
     }
 
-    void Bouncing(object holder, EventArgs args) 
+    void Bouncing(object holderObj, EventArgs args) 
     {
-        if(InAir)
+        if(holder.InAir)
         {
             Vector3 inversedDirection = transform.InverseTransformDirection(rb.linearVelocity);
             rb.linearVelocity = inversedDirection;
@@ -166,16 +144,16 @@ public class Locomotion : MonoBehaviour
         {
             CancelAction = false;
             IsJumping = false;
-            time = 0;
+            holder.ResetTime();
             return;
         }
         var isGrouded = holder.GroundCheck.IsColliding;
 
-        if(isGrouded || (!isGrouded && jumpCount > 0)) 
+        if(isGrouded || (!isGrouded && JumpCount > 0)) 
         {
             rb.AddForce(direction, ForceMode.Impulse);
-            time = 0;
-            jumpCount--;
+            holder.ResetTime();
+            JumpCount--;
         }
     }
 
@@ -185,16 +163,10 @@ public class Locomotion : MonoBehaviour
         {
             var dir = holder.Velocity * direction.magnitude * transform.forward;
             var targetSpeed = holder.Velocity - rb.linearVelocity.magnitude;
-            if(rb.linearVelocity.magnitude < holder.Velocity)
+            if(rb.linearVelocity.magnitude < holder.Velocity && !IsJumping)
             {
-                if(direction.magnitude > 0)
-                {
-                    rb.AddForce(new Vector3(dir.x , rb.linearVelocity.y , dir.z) * targetSpeed);
-                }
-                else
-                {
-                    rb.linearVelocity = Vector3.zero;
-                }
+                var movedir = new Vector3(dir.x , rb.linearVelocity.y , dir.z);
+                rb.linearVelocity = direction.magnitude > 0 ? movedir : Vector3.zero; 
             }
         }
     }
@@ -203,12 +175,11 @@ public class Locomotion : MonoBehaviour
     {
         if(holder == null) return;
 
-        float angle = Mathf.Lerp(MIN_FORCE_ANGLE, MAX_FORCE_ANGLE, normalizedTime);
-        float force = Mathf.Lerp(MIN_FORCE, MAX_FORCE, normalizedTime);
+        float angle = Mathf.Lerp(MIN_FORCE_ANGLE, MAX_FORCE_ANGLE, holder.NormalizedTime);
+        float force = Mathf.Lerp(MIN_FORCE, MAX_FORCE, holder.NormalizedTime);
 
         float cameraRotation = holder.CameraTransform.eulerAngles.y;
         Vector3 fowardDirection = Quaternion.Euler(0,cameraRotation,0) * (Vector3.forward * forwardForce);
-        Vector3 upDirection = new Vector3(0,angle,0) * upForce;
 
 
         // Gizmos.DrawRay(transform.position, fowardDirection * force);
@@ -222,8 +193,8 @@ public class Locomotion : MonoBehaviour
         Gizmos.DrawRay(transform.position, (fowardDirection + (new Vector3(0,MIN_FORCE_ANGLE,0) * upForce)) * force);
 
         // LERP UP ANGLE
-        var color = Color.Lerp(Color.yellow, Color.blue, normalizedTime);
-        Gizmos.color = normalizedTime > 0 ? color : Color.clear;
+        var color = Color.Lerp(Color.yellow, Color.blue, holder.NormalizedTime);
+        Gizmos.color = holder.NormalizedTime > 0 ? color : Color.clear;
         Gizmos.DrawRay(transform.position, direction);
     }
 }
