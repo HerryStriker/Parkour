@@ -1,4 +1,6 @@
 using UnityEngine;
+using System.Collections;
+using System.Collections.Generic;
 
 public class CheckPoint : MonoBehaviour
 {
@@ -13,6 +15,12 @@ public class CheckPoint : MonoBehaviour
 
     private void OnValidate()
     {   
+
+        int[] my = new int[]
+        {
+            0, 1, 2,
+        };
+
         if(_cc == null)
         {
             _cc = GetComponent<CapsuleCollider>();

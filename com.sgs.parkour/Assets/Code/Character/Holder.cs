@@ -80,7 +80,7 @@ public class Holder : MonoBehaviour
 
     public float Velocity {
         get {
-            return Mathf.Lerp(0f, sprint_velocity, NormalizedVelocity);
+            return Mathf.Lerp(walk_velocity, sprint_velocity, NormalizedVelocity);
         }
     }
 #endregion
