@@ -1,5 +1,4 @@
 using System;
-using Unity.Mathematics;
 using UnityEngine;
 
 public class Look : MonoBehaviour
@@ -85,7 +84,7 @@ public class Look : MonoBehaviour
         Vector2 moveDirection = new Vector2(input.x * m_CameraSensitivityX, input.y * m_CameraSensitivityY) * m_CameraSensitivityNormalized;
         m_CameraInput = m_CameraInputSettings.GetSmoothDampSettings(moveDirection, ref m_CameraInput);
 
-        Vector3 point = transform.position + Vector3.up * m_CameraPointOffset;
+        Vector3 lookPosition = transform.position + Vector3.up * m_CameraPointOffset;
 
         if(m_cameraRotation) 
         {
@@ -99,10 +98,11 @@ public class Look : MonoBehaviour
 
         m_CameraDirection = Quaternion.Euler(m_CameraRotation) * -Vector3.forward * m_CameraDistance;
 
-        OnCollision = Physics.Raycast(point, m_CameraDirection, out RaycastHit hit, m_CameraDistance, m_CollisionMask);
-        holder.CameraTransform.position = OnCollision ? hit.point : point + m_CameraDirection;
+        OnCollision = Physics.Raycast(lookPosition, m_CameraDirection, out RaycastHit hit, m_CameraDistance, m_CollisionMask);
 
-        holder.CameraTransform.LookAt(point);
+        holder.CameraTransform.position = OnCollision ? hit.point : lookPosition + m_CameraDirection;;
+
+        holder.CameraTransform.LookAt(lookPosition);
     }
 #endregion
 
@@ -127,4 +127,21 @@ void RotateTowardsMoveDirection()
     rb.MoveRotation(Quaternion.Euler(0,rot,0));
 }
 #endregion
+
+#region Gizmos
+    [Space(10)]
+    [Header("DEBUG")]
+    [SerializeField] bool EnableGizmos = false;
+    void OnDrawGizmos()
+    {
+        if(EnableGizmos)
+        {
+            Vector3 lookPosition = transform.position + Vector3.up * m_CameraPointOffset;
+            Gizmos.DrawWireSphere(lookPosition, m_CameraDistance);
+        }
+
+    }
+
+    #endregion
+
 }

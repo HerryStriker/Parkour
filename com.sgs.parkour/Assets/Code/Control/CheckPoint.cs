@@ -5,7 +5,7 @@ using System.Collections.Generic;
 public class CheckPoint : MonoBehaviour
 {
     CapsuleCollider _cc;
-    [SerializeField] string name;
+    [SerializeField] string nam;
     [TextArea, SerializeField] string description;
 
     [SerializeField] ulong flagID;

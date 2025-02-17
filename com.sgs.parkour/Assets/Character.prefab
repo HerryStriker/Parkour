@@ -192,7 +192,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &266748114156217534
 Transform:
   m_ObjectHideFlags: 0
@@ -272,6 +272,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f274f43051eef69489330bc797a83c6b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  walk_velocity: 0
+  run_velocity: 4
+  sprint_velocity: 8
   <FrontCheck>k__BackingField:
     inversedDirection: 0
     direction: 1
@@ -361,3 +364,4 @@ MonoBehaviour:
   m_CollisionMask:
     serializedVersion: 2
     m_Bits: 8
+  EnableGizmos: 0

@@ -1,7 +1,4 @@
 using System;
-using Unity.Mathematics;
-using Unity.VisualScripting;
-using UnityEditor.Experimental.GraphView;
 using UnityEngine;
 
 [RequireComponent(typeof(Rigidbody), typeof(CapsuleCollider))]
@@ -89,8 +86,11 @@ public class Locomotion : MonoBehaviour
     [Header("JUMP")]
     public bool IsJumping = false;
 
+    public event EventHandler OnDoubleJumpChangedCallback;
+
+    [Header("DOUBLE JUMP")]
+    [field: SerializeField] public int JumpCount {get; private set;}
     const int MAX_JUMP_COUNT = 10;
-    public int JumpCount {get; private set;}
 
     Vector3 direction;
 
@@ -149,11 +149,12 @@ public class Locomotion : MonoBehaviour
         }
         var isGrouded = holder.GroundCheck.IsColliding;
 
-        if(isGrouded || (!isGrouded && JumpCount > 0)) 
+        if(isGrouded || JumpCount > 0) 
         {
             rb.AddForce(direction, ForceMode.Impulse);
             holder.ResetTime();
             JumpCount--;
+            OnDoubleJumpChangedCallback?.Invoke(this, new EventArgs());
         }
     }
 
@@ -162,7 +163,7 @@ public class Locomotion : MonoBehaviour
         if (EnableMovement && holder.GroundCheck.IsColliding && !IsJumping)
         {
             var dir = holder.Velocity * direction.magnitude * transform.forward;
-            var targetSpeed = holder.Velocity - rb.linearVelocity.magnitude;
+            // var targetSpeed = holder.Velocity - rb.linearVelocity.magnitude;
             if(rb.linearVelocity.magnitude < holder.Velocity && !IsJumping)
             {
                 var movedir = new Vector3(dir.x , rb.linearVelocity.y , dir.z);

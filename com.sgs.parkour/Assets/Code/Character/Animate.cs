@@ -1,8 +1,6 @@
 using System;
-using TMPro;
-using Unity.VisualScripting;
-using UnityEditor.Animations;
 using UnityEngine;
+
 public class Animate : MonoBehaviour {
 
     Holder holder;
@@ -48,7 +46,6 @@ public class Animate : MonoBehaviour {
 
         animator.SetFloat("VELOCITY", holder.NormalizedVelocity);
         animator.SetBool("IS_MOVING", InputManager.Instance.IsMoving);
-
     }
 
 
@@ -56,15 +53,13 @@ public class Animate : MonoBehaviour {
     {
         animator.SetTrigger("LANDING");
         animator.ResetTrigger("JUMP");
+        animator.ResetTrigger("JUMP_START");
     }
 
 
     private void OnJumpStart(object sender, EventArgs e)
     {
-
-
             animator.SetTrigger("JUMP_START");
-
     }
 
     void OnJumpCanceled(object inputManager, EventArgs args)

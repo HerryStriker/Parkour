@@ -1,9 +1,5 @@
 using System;
-using JetBrains.Annotations;
-using Unity.Mathematics;
-using Unity.VisualScripting;
 using UnityEngine;
-using UnityEngine.Rendering.Universal;
 
 public class Holder : MonoBehaviour
 {
