@@ -15,6 +15,8 @@ public class Status : MonoBehaviour
     {
         doubleJumpCounter = new DoubleJumpCounter(doubleJumpCounter, _locomotion.JumpCount);
         loaderController = new LoaderController(loaderController);
+        lifeController = new LifeController(lifeController);
+
         InputManager.Instance.OnJumpStart += OnJumpStart;
         InputManager.Instance.OnJumpCanceled += OnJumpCanceled;
 
@@ -30,6 +32,7 @@ public class Status : MonoBehaviour
     void Update()
     {
         loaderController?.Update(holder.NormalizedTime);
+        lifeController?.Update(holder.Life.NormalizedValue);
     }
 
     private void OnJumpCanceled(object sender, EventArgs e)
@@ -49,5 +52,8 @@ public class Status : MonoBehaviour
 
     // DOUBLE JUMP COUNTER
     [SerializeField] DoubleJumpCounter doubleJumpCounter;
-    
+
+    // LIFE
+    [SerializeField] LifeController lifeController;
+     
 }

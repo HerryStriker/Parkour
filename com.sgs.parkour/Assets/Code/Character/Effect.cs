@@ -8,7 +8,7 @@ public class Effect : MonoBehaviour
     Holder holder;
 
     [SerializeField] List<EffectMap> effects;
-    [SerializeField] EffectMap currentEffect;
+    EffectMap currentEffect;
     void Awake()
     {
         holder = GetComponent<Holder>();

@@ -6,7 +6,6 @@ public class Locomotion : MonoBehaviour
 {
     Holder holder;
     Rigidbody rb;
-    CapsuleCollider capsuleCollider;
 
     public bool EnableMovement {get; private set; } = true;
     public bool CancelAction {get; private set; } = false;
@@ -14,16 +13,14 @@ public class Locomotion : MonoBehaviour
     public void EnableCharacterMovement(bool enable)
     {
         EnableMovement = enable;
+        rb.linearVelocity = Vector3.zero;
+        rb.useGravity = enable;
     }
 
     private void Awake() 
     {
         holder = GetComponent<Holder>();
         rb = GetComponent<Rigidbody>();
-        capsuleCollider = GetComponent<CapsuleCollider>();
-
-        capsuleCollider.center += new Vector3(0, 1, 0);
-        capsuleCollider.height = 2;
 
         JumpCount = MAX_JUMP_COUNT;
     }
@@ -158,17 +155,23 @@ public class Locomotion : MonoBehaviour
         }
     }
 
+    [SerializeField, Range(-1f, 0f)] float fallingThreshold = -.1f;
+    public bool IsFalling {
+        get {
+            return rb.linearVelocity.y < fallingThreshold;
+        }
+    }
+
     void Move(Vector2 direction)
     {
         if (EnableMovement && holder.GroundCheck.IsColliding && !IsJumping)
         {
             var dir = holder.Velocity * direction.magnitude * transform.forward;
-            // var targetSpeed = holder.Velocity - rb.linearVelocity.magnitude;
-            if(rb.linearVelocity.magnitude < holder.Velocity && !IsJumping)
-            {
-                var movedir = new Vector3(dir.x , rb.linearVelocity.y , dir.z);
-                rb.linearVelocity = direction.magnitude > 0 ? movedir : Vector3.zero; 
-            }
+            
+
+            var movedir = new Vector3(dir.x , rb.linearVelocity.y , dir.z);
+            rb.linearVelocity = direction.magnitude > 0 ? movedir : Vector3.zero; 
+
         }
     }
 
