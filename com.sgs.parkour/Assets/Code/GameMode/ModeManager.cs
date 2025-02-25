@@ -4,11 +4,13 @@ using UnityEngine;
 
 public class ModeManager : MonoBehaviour
 {   
+    public delegate void ModeHandler(ModeType type);
+    public ModeHandler OnModeStartsCallback;
     public static ModeManager Instance;
 
     [SerializeField] StateObject<ModeType> _mode;
     [SerializeField] TimeCounter timeCounter;
-    
+
     void Awake()
     {
         Instance = this;
@@ -20,6 +22,7 @@ public class ModeManager : MonoBehaviour
     public void StartGame()
     {
         timeCounter.Start(this);
+        OnModeStartsCallback?.Invoke(_mode.State);
     }
     
     public StateObject<ModeType> Mode => _mode;

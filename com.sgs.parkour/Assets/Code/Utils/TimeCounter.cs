@@ -40,18 +40,23 @@ public class TimeCounter
 
     public void Start(MonoBehaviour monoBehaviour)
     {
-        Reset();
-        isCounting = true;
-        
+        if(isCounting) return;
+
+        isCounting = true;        
         monoBehaviour.StartCoroutine(IncrementTimer());
     }
 
-    void Reset()
+    public void Reset(MonoBehaviour monoBehaviour)
+    {
+        Stop();
+        Start(monoBehaviour);
+    }
+
+    public void Stop()
     {
         s = 0;
         m = 0;
         h = 0;
         isCounting = false;
-        
     }
 }
