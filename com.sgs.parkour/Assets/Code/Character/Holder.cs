@@ -1,6 +1,7 @@
 using System;
 using UnityEngine;
 using Parkour.Status;
+using System.Collections.Generic;
 
 public class Holder : MonoBehaviour
 {
@@ -20,7 +21,18 @@ public class Holder : MonoBehaviour
 
     [field: SerializeField] public CollisionCheck FrontCheck { get; private set; }
     [field: SerializeField] public CollisionCheck GroundCheck { get; private set; }
-    [field: SerializeField] public CollisionCheck CheckPointCheck { get; private set; }
+    [field: SerializeField] public CollisionCheckData<CheckPoint> CheckPoint_Check { get; private set; }
+
+    public bool EqualCheckPoint(CheckPoint checkPoint)
+    {
+        var checkdata = CheckPoint_Check.GetData();
+
+        if(checkPoint != null && checkdata != null)
+        {
+            return checkPoint.FlagID == checkdata.FlagID;
+        }
+        return false;
+    }
 
     #endregion
     
@@ -70,15 +82,20 @@ public class Holder : MonoBehaviour
     const float MIN_FALLING_DAMAGE = 100f;
     const float MAX_FALLING_DAMAGE = MAX_LIFE;
 
-    public void Revive()
-    {
         const float REVIVE_LIFE = .2f;
+        const float RESPAWN_LIFE = 1f;
+    public void Revive(float lifePercentage)
+    {
+        ragdollController.EnableRagdoll(false);
+        Life.ChangePercentageValue(lifePercentage, ValueType.INCREASE);
+        IsAlive = true;
+        fallingTime = 0;
+    }
 
-        if(Life.NormalizedValue < REVIVE_LIFE)
-        {
-            ragdollController.EnableRagdoll(false);
-            Life.ChangePercentageValue(REVIVE_LIFE, ValueType.INCREASE);
-        }
+    public void Respawn(Vector3 respawnPosition)
+    {
+        _locomotion.MovePosition(respawnPosition);
+        Revive(RESPAWN_LIFE);
     }
 
     void LifeLogic()
@@ -130,7 +147,7 @@ public class Holder : MonoBehaviour
         _locomotion = GetComponent<Locomotion>();
         GroundCheck = new CollisionCheck(GroundCheck, transform);
         FrontCheck = new CollisionCheck(FrontCheck, transform);
-        CheckPointCheck = new CollisionCheck(CheckPointCheck, transform);
+        CheckPoint_Check = new CollisionCheckData<CheckPoint>(CheckPoint_Check, CheckPoint_Check, transform);
         
         mainCamera = Camera.main;
         CameraTransform = mainCamera.transform;
@@ -225,6 +242,7 @@ public class Holder : MonoBehaviour
     {
         GroundCheck.DrawGizmos();
         FrontCheck.DrawGizmos();
-        CheckPointCheck.DrawGizmos();
+        CheckPoint_Check.DrawGizmos();
     }
+
 }

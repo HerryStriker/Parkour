@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEditor;
 using UnityEditor.Callbacks;
 using UnityEngine;
@@ -12,12 +13,29 @@ public class RagdollController : MonoBehaviour
     public List<RagdollObject> RagdollObject;
     [SerializeField] Animator animator;
     [SerializeField] Rigidbody characterRigidbody;
+    [SerializeField] Transform dummyTransform;
 
     [field: SerializeField] public bool IsEnable {get; private set;}
     [SerializeField, Range(0, 20)] float inpulseVelocity = 2f;
     void Awake()
     {
         characterRigidbody = GetComponentInParent<Rigidbody>();
+        OnRagdollDisable += OnRagdollDisableCallback;
+
+    }
+
+    void Start()
+    {
+        RagdollObject.Clear();
+        LoadColliders();
+    }
+
+    private void OnRagdollDisableCallback()
+    {   
+        foreach (var rd in RagdollObject)
+        {
+            rd.ResetPosition();
+        }
     }
 
     public void EnableRagdoll(bool enable, bool inAir = default)
@@ -37,6 +55,21 @@ public class RagdollController : MonoBehaviour
         ragdollAction?.Invoke();
     }
 
+    public void LoadColliders()
+    {
+
+        var bodyColliders = transform.GetComponentsInChildren<Collider>();
+
+        foreach (var collider in bodyColliders)
+        {
+            if(collider.TryGetComponent(out Rigidbody rb))
+            {
+                RagdollObject.Add(new RagdollObject(collider.name, rb, collider.transform));
+            }
+        }
+
+            
+    }
 }
 
 
@@ -45,17 +78,24 @@ public class RagdollObject
 {
     [SerializeField] string bodyName;
     [SerializeField] Rigidbody rigidbody;
+    [SerializeField] Transform transform;
 
-    public RagdollObject(string colliderName, Rigidbody rigidbody)
+    public RagdollObject(string colliderName, Rigidbody rigidbody, Transform transform)
     {
         this.bodyName = colliderName;
         this.rigidbody = rigidbody;
+        this.transform = transform;
     }
 
     public void ResetVelocity(Vector3 direction = default)
     {
         rigidbody.linearVelocity = direction.magnitude > 0 ? direction : Vector3.zero;
         rigidbody.angularDamping = 0;
+    }
+
+    public void ResetPosition()
+    {
+        transform.localPosition = Vector3.zero;
     }
 }
 
@@ -65,23 +105,6 @@ public class RagdollObject
     [CustomEditor(typeof(RagdollController))]
     public class RagdollControllerEdito : Editor
     {
-        void LoadColliders()
-        {
-            var ragdollController = (RagdollController)target;
-
-            var bodyColliders = ragdollController.transform.GetComponentsInChildren<Collider>();
-
-            foreach (var collider in bodyColliders)
-            {
-                if(collider.TryGetComponent(out Rigidbody rb))
-                {
-                    ragdollController.RagdollObject.Add(new RagdollObject(collider.name, rb));
-                }
-            }
-
-        
-        }
-
         void Clear()
         {
             var ragdollController = (RagdollController)target;
@@ -98,7 +121,8 @@ public class RagdollObject
             GUILayout.BeginHorizontal();
             if(GUILayout.Button("Load Colliders"))
             {
-                LoadColliders();
+                Clear();
+                ragdollController.LoadColliders();
             }
             if(GUILayout.Button("Clear Colliders"))
             {

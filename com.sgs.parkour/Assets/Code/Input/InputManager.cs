@@ -27,9 +27,25 @@ public class InputManager : MonoBehaviour, IPlayerActions
         throw new System.NotImplementedException();
     }
 
+    public void EnableInteract()
+    {
+        inputActions.Player.Interact.Enable();
+    }
+
+    public void DisableInteract()
+    {
+        inputActions.Player.Interact.Disable();
+    }
+
+    public event EventHandler OnInteractStart;
+    public event EventHandler OnInteractPerformed;
+    public event EventHandler OnInteractCanceled;
+
+    public bool IsInteracting { get; private set; }
     void IPlayerActions.OnInteract(InputAction.CallbackContext context)
     {
-        throw new System.NotImplementedException();
+        InvokeEvents_SPC(context, OnInteractStart, OnInteractPerformed, OnInteractCanceled);
+        IsInteracting = context.ReadValue<float>() > 0;
     }
 
     public void EnableJump() {
@@ -174,4 +190,3 @@ public class InputManager : MonoBehaviour, IPlayerActions
         
     }
 }
-

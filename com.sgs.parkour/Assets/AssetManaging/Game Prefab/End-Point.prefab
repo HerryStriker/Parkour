@@ -10,6 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1879132817463494781}
   - component: {fileID: -7315100491519976113}
+  - component: {fileID: 996455206945080868}
   m_Layer: 0
   m_Name: End-Point
   m_TagString: Untagged
@@ -49,9 +50,34 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   nam: 
   description: 
-  flagID: 0
-  radius: 1
-  heigth: 0
+  <flagID>k__BackingField: 0
+  <t_CheckPoint>k__BackingField: 2
+  c_radius: 1.92
+  s_radius: 1.88
+  s_heigth: 1.29
+  idle: {fileID: 0}
+  pickup: {fileID: 0}
+--- !u!65 &996455206945080868
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6590708123422724139}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 512
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 2, y: 5.512678, z: 2}
+  m_Center: {x: 0, y: 2.856339, z: 0}
 --- !u!1 &8447019379259071131
 GameObject:
   m_ObjectHideFlags: 0
@@ -63,9 +89,9 @@ GameObject:
   - component: {fileID: 4822472197156804274}
   - component: {fileID: 1225594365743495212}
   - component: {fileID: 3239185763895798368}
-  - component: {fileID: 5943653243007141465}
+  - component: {fileID: 5002492632346276888}
   m_Layer: 3
-  m_Name: Cube (21)
+  m_Name: Floor
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -80,8 +106,8 @@ Transform:
   m_GameObject: {fileID: 8447019379259071131}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 11.458935, y: 0.062477585, z: 7.4969664}
+  m_LocalPosition: {x: 0, y: -0.232, z: 0}
+  m_LocalScale: {x: 7.464923, y: 0.65420896, z: 7.4969664}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 1879132817463494781}
@@ -139,7 +165,7 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
---- !u!65 &5943653243007141465
+--- !u!65 &5002492632346276888
 BoxCollider:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -158,7 +184,7 @@ BoxCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Size: {x: 1, y: 1, z: 1}
+  m_Size: {x: 1, y: 1, z: 1.0000001}
   m_Center: {x: 0, y: 0, z: 0}
 --- !u!1001 &790512116110744641
 PrefabInstance:

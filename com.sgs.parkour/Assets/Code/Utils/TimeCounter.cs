@@ -5,58 +5,89 @@ using UnityEngine;
 [System.Serializable]
 public class TimeCounter
 {
-    [SerializeField] bool isCounting = false;
-    [SerializeField] float h,m,s;
-    [SerializeField] float incrementTime = 1f;
-    const float MAX_TIME_UNITY = 59;
-    public IEnumerator IncrementTimer()
-    {
-        do {
-            s += incrementTime;
+    public delegate void TimerDelegate(TimerState state);
+    public event TimerDelegate OnTimerStateChanged;
+    public event TimerDelegate OnTimerStateStart;
+    public event TimerDelegate OnTimerStateStopped;
+    public event TimerDelegate OnTimerStatePaused;
+    public event TimerDelegate OnTimerStateEnd;
+    public event TimerDelegate OnTimerStateHalf;
 
-            if(s > MAX_TIME_UNITY)
+    [SerializeField] TimerState state;
+    [SerializeField] float t;
+    float maxTime = 0;
+    readonly MonoBehaviour behaviour;
+    public TimeCounter(MonoBehaviour monoBehaviour)
+    {
+        behaviour = monoBehaviour;
+    }
+
+    public void Start(float t)
+    {
+        maxTime = t;
+        ChangeState(TimerState.RUNNING);
+
+        behaviour.StartCoroutine(StartCoroutine());
+        OnTimerStateStart?.Invoke(TimerState.RUNNING);
+    }
+
+    IEnumerator StartCoroutine()
+    {
+        do
+        {
+            t += 1;
+
+            if(t == maxTime)
             {
-                s = 0;
-                m += 1;
-
-                if(m > MAX_TIME_UNITY)
-                {
-                    m = 0;
-                    h += 1;
-
-                    if(h > MAX_TIME_UNITY)
-                    {
-                        s = 0;
-                        m = 0;
-                        h = 0;
-                        isCounting = false;
-                    }
-                }
+                ChangeState(TimerState.STOPPED);
+                OnTimerStateEnd?.Invoke(TimerState.STOPPED);
             }
+            
+            if(t == maxTime / 2)
+            {
+                OnTimerStateHalf?.Invoke(TimerState.STOPPED);
+            }
+
             yield return new WaitForSecondsRealtime(1f);
+        } while (state == TimerState.RUNNING);
+    }
+
+    public void Pause()
+    {
+        ChangeState(Switch(state));
+        OnTimerStatePaused?.Invoke(state);
+
+        if(state == TimerState.RUNNING)
+        {
+            behaviour.StartCoroutine(StartCoroutine());
         }
-        while (isCounting);
-    }
-
-    public void Start(MonoBehaviour monoBehaviour)
-    {
-        if(isCounting) return;
-
-        isCounting = true;        
-        monoBehaviour.StartCoroutine(IncrementTimer());
-    }
-
-    public void Reset(MonoBehaviour monoBehaviour)
-    {
-        Stop();
-        Start(monoBehaviour);
     }
 
     public void Stop()
     {
-        s = 0;
-        m = 0;
-        h = 0;
-        isCounting = false;
+        ChangeState(TimerState.STOPPED);
+        OnTimerStateStopped?.Invoke(state);
+    }
+    
+    TimerState Switch( TimerState state)
+    {
+        switch (state)
+        {
+            default:
+            case TimerState.PAUSED: return TimerState.RUNNING;
+            case TimerState.RUNNING: return TimerState.PAUSED;
+        }
+    }
+
+    public void ChangeState(TimerState state)
+    {
+        this.state = state;
+        OnTimerStateChanged?.Invoke(state);
     }
 }
+    public enum TimerState
+    {
+        RUNNING,
+        PAUSED,
+        STOPPED,
+    }

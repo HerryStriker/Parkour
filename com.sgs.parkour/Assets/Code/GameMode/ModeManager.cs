@@ -6,8 +6,11 @@ public class ModeManager : MonoBehaviour
 {   
     public delegate void ModeHandler(ModeType type);
     public ModeHandler OnModeStartsCallback;
-    public static ModeManager Instance;
-
+    public ModeHandler OnModeEndsCallback;
+    public static ModeManager Instance { get; private set; }
+    public static MatchScoreManager MatchScoreInstance { get; private set; }
+    
+    
     [SerializeField] StateObject<ModeType> _mode;
     [SerializeField] TimeCounter timeCounter;
 
@@ -16,12 +19,20 @@ public class ModeManager : MonoBehaviour
         Instance = this;
         DontDestroyOnLoad(gameObject);
         _mode = new StateObject<ModeType>(ModeType.NONE);
-        timeCounter = new TimeCounter();
+        timeCounter = new TimeCounter(this);
+
+        StartGame(30);
     }
 
     public void StartGame()
     {
-        timeCounter.Start(this);
+        timeCounter.Start(180);
+        OnModeStartsCallback?.Invoke(_mode.State);
+    }
+
+    public void StartGame(float t)
+    {
+        timeCounter.Start(t);    
         OnModeStartsCallback?.Invoke(_mode.State);
     }
     

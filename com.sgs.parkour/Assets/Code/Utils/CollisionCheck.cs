@@ -2,24 +2,25 @@ using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
 using System;
+using JetBrains.Annotations;
 
 [System.Serializable]
 public class CollisionCheck
 {
-    public event EventHandler OnEnter;
-    public event EventHandler OnExit;
+    public EventHandler OnEnter;
+    public EventHandler OnExit;
 
-    public bool IsColliding { get; private set; } = false;
+    public bool IsColliding { get; protected set; } = false;
 
-    [SerializeField] bool inversedDirection = false;
-    [SerializeField] CheckDirection direction = CheckDirection.CENTER;
-    [SerializeField] CheckType type = CheckType.BOX;
-    [SerializeField] float range = 1f;
-    [SerializeField] float height = 1f;
-    [SerializeField] float radius = 0.1f;
-    [SerializeField] LayerMask mask;
+    [SerializeField] protected bool inversedDirection = false;
+    [SerializeField] protected CheckDirection direction = CheckDirection.CENTER;
+    [SerializeField] protected CheckType type = CheckType.BOX;
+    [SerializeField] protected float range = 1f;
+    [SerializeField] protected float height = 1f;
+    [SerializeField] protected float radius = 0.1f;
+    [SerializeField] protected LayerMask mask;
 
-    readonly Transform transform;
+    protected Transform transform;
     public CollisionCheck(CollisionCheck collisionCheck, Transform transform)
     {
         this.transform = transform;
@@ -33,13 +34,13 @@ public class CollisionCheck
         this.height = collisionCheck.height;
         this.enableGizmos = collisionCheck.enableGizmos;
         
-        if(transform.TryGetComponent(out MonoBehaviour monoBehaviour))
+        if(this.transform.TryGetComponent(out MonoBehaviour monoBehaviour))
         {
             monoBehaviour.StartCoroutine(UpdateCheck());
         }
     }
-    
-    IEnumerator UpdateCheck()
+
+    public virtual IEnumerator UpdateCheck()
     {
         while(true)
         {
@@ -73,7 +74,7 @@ public class CollisionCheck
         }
     }
 
-    Vector3 Position(Transform transform)
+    protected Vector3 Position(Transform transform)
     {
         var positionHeight = transform.position + Vector3.up * height;
 
@@ -95,7 +96,7 @@ public class CollisionCheck
     
     [Space(10)]
     [SerializeField] bool enableGizmos = true;    
-    public void DrawGizmos()
+    public virtual void DrawGizmos()
     {
         if(!enableGizmos || transform == null) return;
 

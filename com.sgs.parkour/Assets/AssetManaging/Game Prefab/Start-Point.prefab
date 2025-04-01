@@ -48,9 +48,13 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   nam: 
   description: 
-  flagID: 0
-  radius: 1
-  heigth: 0
+  <flagID>k__BackingField: 0
+  <t_CheckPoint>k__BackingField: 0
+  c_radius: 2.25
+  s_radius: 2.13
+  s_heigth: 3.19
+  idle: {fileID: 0}
+  pickup: {fileID: 0}
 --- !u!1 &8450301135864228413
 GameObject:
   m_ObjectHideFlags: 0
@@ -62,9 +66,9 @@ GameObject:
   - component: {fileID: 7700192748726640332}
   - component: {fileID: 2918303475228047164}
   - component: {fileID: 952374268292573581}
-  - component: {fileID: 3839850698820356831}
+  - component: {fileID: 255584052006964335}
   m_Layer: 3
-  m_Name: Cube
+  m_Name: Floor
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -80,7 +84,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 8.5, y: 0.2, z: 8.5}
+  m_LocalScale: {x: 7.464923, y: 0.65420896, z: 7.4969664}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 6309260142004629118}
@@ -138,7 +142,7 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
---- !u!65 &3839850698820356831
+--- !u!65 &255584052006964335
 BoxCollider:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -211,7 +215,8 @@ PrefabInstance:
       propertyPath: m_Name
       value: Flag-Collider
       objectReference: {fileID: 0}
-    m_RemovedComponents: []
+    m_RemovedComponents:
+    - {fileID: 3141420167555523618, guid: f6bcd1bc6a03fcf4db33768bcacd7891, type: 3}
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
     m_AddedComponents: []

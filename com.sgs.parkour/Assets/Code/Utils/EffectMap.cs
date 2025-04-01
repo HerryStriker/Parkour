@@ -64,10 +64,7 @@ public class EffectMap
 
     public void Stop()
     {
-        if(particleSystem.isPlaying)
-        {
-            particleSystem.Stop();
-        }
+        particleSystem.Stop();
     }
 
     public void Reset()

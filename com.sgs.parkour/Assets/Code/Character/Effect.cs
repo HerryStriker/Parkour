@@ -8,7 +8,7 @@ public class Effect : MonoBehaviour
     Holder holder;
 
     [SerializeField] List<EffectMap> effects;
-    EffectMap currentEffect;
+    [SerializeField] EffectMap currentEffect;
     void Awake()
     {
         holder = GetComponent<Holder>();
@@ -34,6 +34,7 @@ public class Effect : MonoBehaviour
         // AFTER RELEASE THE JUMP BUTTON
         InputManager.Instance.OnJumpCanceled += (sender, args) =>
         {
+            currentEffect = GetEffect(MovementEffectType.LOADING);
             currentEffect?.Stop();
 
             currentEffect = GetEffect(MovementEffectType.JUMPING);

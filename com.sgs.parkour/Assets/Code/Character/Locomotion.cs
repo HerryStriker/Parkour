@@ -175,6 +175,14 @@ public class Locomotion : MonoBehaviour
         }
     }
 
+#region Utils
+    public void MovePosition(Vector3 position)
+    {
+        rb.linearVelocity = Vector3.zero;
+        rb.MovePosition(position);
+    }  
+#endregion
+
     private void OnDrawGizmos()
     {
         if(holder == null) return;
